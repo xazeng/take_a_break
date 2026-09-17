@@ -1,12 +1,14 @@
 #pragma once
 #include <windows.h>
 #include <cstdint>
+#include <string>
 
 namespace tab {
 struct Config {
     unsigned intervalMinutes = 60;
     unsigned breakSeconds = 10;
     bool hourly = false;
+    std::wstring executablePath;
 };
 
 inline bool ValidConfig(const Config& value) noexcept {
