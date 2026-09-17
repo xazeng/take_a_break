@@ -1,0 +1,46 @@
+#include <windows.h>
+#include "resource.h"
+#pragma code_page(65001)
+1 RT_MANIFEST "app.manifest"
+IDI_APP ICON "../assets/take-a-break.ico"
+
+IDD_SETTINGS DIALOGEX 0, 0, 310, 179
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "起来歇会儿 · 设置"
+FONT 9, "Microsoft YaHei UI"
+BEGIN
+    LTEXT "登录或解锁后重新计时；锁屏期间不提醒。", -1, 14, 12, 280, 14
+    LTEXT "提醒间隔（分钟）", -1, 14, 38, 105, 14
+    EDITTEXT IDC_INTERVAL, 125, 35, 65, 16, ES_NUMBER | WS_TABSTOP
+    LTEXT "1 ～ 1440", -1, 202, 38, 90, 14
+    LTEXT "休息时长（秒）", -1, 14, 64, 105, 14
+    EDITTEXT IDC_DURATION, 125, 61, 65, 16, ES_NUMBER | WS_TABSTOP
+    LTEXT "1 ～ 3600", -1, 202, 64, 90, 14
+    CONTROL "改为每个整点提醒", IDC_HOURLY, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 14, 88, 270, 14
+    CONTROL "登录时自动运行（当前用户）", IDC_AUTOSTART, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 14, 108, 270, 14
+    LTEXT "", IDC_CONFIG_PATH, 14, 131, 283, 17, SS_PATHELLIPSIS
+    DEFPUSHBUTTON "保存", IDOK, 178, 154, 55, 18
+    PUSHBUTTON "取消", IDCANCEL, 242, 154, 55, 18
+END
+
+1 VERSIONINFO
+FILEVERSION 0,1,0,0
+PRODUCTVERSION 0,1,0,0
+FILEOS VOS_NT_WINDOWS32
+FILETYPE VFT_APP
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "080404B0"
+    BEGIN
+      VALUE "FileDescription", "起来歇会儿 / Take a Break\0"
+      VALUE "ProductName", "Take a Break\0"
+      VALUE "FileVersion", "0.1.0\0"
+      VALUE "OriginalFilename", "TakeABreak.exe\0"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x804, 1200
+  END
+END

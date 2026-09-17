@@ -1,0 +1,8 @@
+#pragma once
+#define IDD_SETTINGS 101
+#define IDI_APP 102
+#define IDC_INTERVAL 1001
+#define IDC_DURATION 1002
+#define IDC_HOURLY 1003
+#define IDC_AUTOSTART 1005
+#define IDC_CONFIG_PATH 1007

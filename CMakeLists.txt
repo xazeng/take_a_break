@@ -1,0 +1,28 @@
+cmake_minimum_required(VERSION 3.20)
+project(TakeABreak VERSION 0.1.0 LANGUAGES CXX RC)
+
+if(NOT WIN32 OR NOT MSVC)
+    message(FATAL_ERROR "Take a Break requires Windows and MSVC.")
+endif()
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+add_compile_definitions(UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX _WIN32_WINNT=0x0A00)
+add_compile_options(/W4 /utf-8 /permissive- /EHsc)
+
+add_executable(TakeABreak WIN32
+    src/main.cpp src/config.cpp src/app.rc)
+target_include_directories(TakeABreak PRIVATE src)
+target_link_libraries(TakeABreak PRIVATE user32 gdi32 shell32 advapi32 ole32 wtsapi32)
+target_compile_options(TakeABreak PRIVATE $<$<CONFIG:Release>:/O1> $<$<CONFIG:Release>:/Gy>)
+target_link_options(TakeABreak PRIVATE /MANIFEST:NO $<$<CONFIG:Release>:/OPT:REF> $<$<CONFIG:Release>:/OPT:ICF> $<$<CONFIG:Release>:/INCREMENTAL:NO>)
+
+include(CTest)
+if(BUILD_TESTING)
+    add_executable(TakeABreakTests tests/tests.cpp src/config.cpp)
+    target_include_directories(TakeABreakTests PRIVATE src)
+    target_link_libraries(TakeABreakTests PRIVATE shell32 advapi32 ole32 user32)
+    add_test(NAME core COMMAND TakeABreakTests)
+    add_test(NAME ui_smoke COMMAND TakeABreak --smoke-test)
+    set_tests_properties(ui_smoke PROPERTIES TIMEOUT 20)
+endif()
