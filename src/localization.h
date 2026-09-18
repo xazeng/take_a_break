@@ -20,7 +20,8 @@ enum class UiText {
     SessionError, TrayError, InvalidConfig,
     SettingsIntro, IntervalLabel, DurationLabel, HourlyLabel, AutoStartLabel, Save, Cancel,
     ConfigInvalid, ConfigDirectoryError, ConfigWriteError, ConfigSaveError,
-    ExecutablePathError, StartupError, ExistingInstanceError, Count
+    ExecutablePathError, StartupError, ExistingInstanceError,
+    NextBreak, SettingsNotice, TimerUnavailable, StatusRefreshError, Count
 };
 
 struct Translation { const wchar_t* chinese; const wchar_t* english; };
@@ -62,7 +63,11 @@ inline constexpr Translation translations[] = {
     {L"保存配置失败，请检查目录权限。", L"Unable to save settings. Please check folder permissions."},
     {L"无法获取程序路径。", L"Unable to determine the executable path."},
     {L"修改登录启动项失败，错误码：", L"Unable to change sign-in startup. Error code: "},
-    {L"程序已在运行，但暂时无法打开设置。请通过已有实例的托盘图标操作。", L"The app is already running, but Settings could not be opened. Please use the existing tray icon."}
+    {L"程序已在运行，但暂时无法打开设置。请通过已有实例的托盘图标操作。", L"The app is already running, but Settings could not be opened. Please use the existing tray icon."},
+    {L"距离下次休息：", L"Next break in: "},
+    {L"设置打开期间不弹出休息提醒，到点重新计时。", L"While Settings is open, due breaks are skipped and rescheduled."},
+    {L"提醒计时未启动，请退出并重新运行。", L"Reminder timer unavailable. Please restart the app."},
+    {L"状态刷新失败，请重新打开设置。", L"Status refresh failed. Please reopen Settings."}
 };
 static_assert(ARRAYSIZE(translations) == static_cast<size_t>(UiText::Count));
 

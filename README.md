@@ -1,33 +1,42 @@
-# 起来歇会儿 · Take a Break
+# Take a Break · 起来歇会儿
 
-一个轻量的 Windows 托盘定时休息工具，采用 **C++17 + 原生 Win32 API**，无需 Qt、Electron 或 .NET。
+English | [简体中文](README.zh-CN.md)
 
-## 功能
+“Just five more minutes.” Sound familiar? Before you know it, you and your chair are in a committed relationship.
 
-- 平时仅显示托盘图标，不占任务栏。
-- 登录后开始计时，默认每 60 分钟休息 10 秒，两个时长均可配置；也可选择整点提醒。
-- 锁屏、注销、切换用户或挂起时取消休息；解锁后重新开始完整计时，不补发旧提醒。
-- 每个显示器显示全屏置顶提醒，覆盖任务栏并同步倒计时；休息结束后统一关闭。
-- 托盘右键提供立即休息、暂停/恢复、设置、登录自启动、移除自动启动并退出、退出。
-- 用户手动暂停后，解锁不会自动恢复提醒；重启程序恢复正常计时。
-- 不安装系统服务，不联网，配置保存在本地小型 INI 中。
-- 自动跟随当前 Windows 用户的界面语言：中文（含繁体中文地区）显示简体中文，其他语言显示英文；重启程序后生效。
+**Take a Break** reminds you to stand up, stretch, and give your eyes some time away from the screen. It stays quietly in your system tray until break time, then shows up on every monitor. Yes, even the one you were about to sneak over to.
 
-## 使用
+By default, take a 10-second break every 60 minutes. Set both durations to suit your day. Just run the EXE—no installation needed. Supports Windows 10/11 x64.
 
-首次运行 `TakeABreak.exe`（配置文件尚不存在）时自动打开设置，“登录时自动运行”默认勾选，点击“保存”后才注册启动项。取消或关闭不会保存或注册，下次启动仍会打开设置。已有配置时直接驻留托盘。
+## Features
 
-在通知区域找到信息图标（可能折叠在隐藏图标中），单击打开设置，右键打开菜单。
+- Stays in the system tray without a taskbar button when idle.
+- Shows the time until your next break in Settings, along with states such as paused or waiting for unlock.
+- Starts counting after sign-in. Both the default 60-minute interval and 10-second break are configurable; reminders on the hour are also available.
+- Cancels breaks when you lock, sign out, switch users, or suspend the computer. Unlocking starts a fresh interval, with no catch-up reminders.
+- Shows a full-screen, topmost reminder on every monitor, covering the taskbar with a shared countdown. All reminder windows close when the break ends.
+- Offers tray menu actions for taking a break now, pausing/resuming, opening Settings, running at sign-in, disabling auto-start and exiting, and exiting.
+- Keeps manual pause in effect after unlocking. Restarting the app resumes normal scheduling.
+- Uses no Windows service or network connection. Settings live in a small local INI file.
+- Follows your Windows user interface language: Chinese variants use Simplified Chinese; all other languages use English. Restart the app after changing your Windows language.
 
-程序按当前 Windows 会话单实例运行。已经启动时再次双击 EXE，会通知已有实例打开设置，新进程随后退出；正在全屏休息时，设置会等倒计时结束再打开。旧版本若尚不支持该通知，请先退出旧版本再启动新版。
+## Getting started
 
-提醒间隔可设为 1～1440 分钟，休息时长可设为 1～3600 秒。休息期间无关闭或最小化按钮，Esc、Alt+F4 及托盘操作不能提前结束休息，请等待倒计时结束。锁屏、注销及系统挂起仍会取消提醒，解锁后重新计时。修改设置并保存后重新计时；整点模式按本地时间的下一个整点提醒。
+Run `TakeABreak.exe`. On first launch, when no configuration file exists, Settings opens automatically with **Run at sign-in** checked. The startup entry is registered only after you click **Save**. Canceling or closing the window saves nothing and leaves startup unchanged; Settings will open again next time. With an existing configuration, the app starts in the tray.
 
-这是窗口层面的全屏提醒，不封锁键盘鼠标。Windows 安全桌面、Ctrl+Alt+Del 和任务管理器仍可使用；无法保证覆盖系统安全界面、独占全屏应用或所有其他置顶窗口。
+Find the app icon in the notification area—it may be under the hidden icons arrow. Click it to open Settings, or right-click for the menu.
 
-登录自启动也可在托盘菜单中切换。此设置仅影响当前用户，无需安装服务；首次设置中的默认勾选要保存后才生效。INI 会记录 EXE 绝对路径。移动程序前先退出，移动后手动运行新位置的 EXE 一次：已有自启动项会自动更新到新路径；原来未启用自启动则保持关闭。不要只移动文件后直接等待登录启动，因为旧路径已经无法启动程序。
+Only one instance runs per Windows session. Double-clicking the EXE again asks the existing instance to open Settings, then exits the new process. During a full-screen break, Settings waits until the countdown ends. If an older version does not support this notification, exit it before starting the new version.
 
-配置在首次保存时生成于：
+Set the reminder interval to 1–1440 minutes and the break duration to 1–3600 seconds. Break windows have no close or minimize buttons; Esc, Alt+F4, and tray actions cannot end a break early. Wait for the countdown to finish. Locking, signing out, or suspending still cancels the break, and unlocking restarts the timer. Saving settings also restarts the timer. On-the-hour mode schedules the next local clock hour.
+
+The countdown in Settings updates every second and reflects the active schedule, not unsaved edits. While Settings is open, breaks do not pop up: a due break is skipped and the next one is scheduled. Close Settings when you are done checking so the app can keep nudging you from the tray.
+
+These are full-screen reminder windows; they do not block keyboard or mouse input. The Windows secure desktop, Ctrl+Alt+Del, and Task Manager remain available. The app cannot guarantee coverage of the secure desktop, exclusive full-screen applications, or every other topmost window.
+
+You can also toggle **Run at sign-in** from the tray menu. It applies only to the current user and requires no service. The checked option on first launch takes effect only after saving. The INI records the EXE's absolute path. Before moving the program, exit it; after moving it, manually run the EXE from its new location once. An existing startup entry will be updated to the new path; disabled auto-start stays disabled. Moving the file alone is not enough—the old startup path can no longer launch it.
+
+The configuration is created on first save at:
 
 ```text
 %LOCALAPPDATA%\TakeABreak\settings.ini
@@ -42,15 +51,17 @@ Hourly=0
 ExecutablePath=C:\Apps\TakeABreak\TakeABreak.exe
 ```
 
-`ExecutablePath` 由程序维护。旧 INI 缺少此字段时会自动补录；首次未保存设置时不会因路径记录而创建 INI，取消后下次启动仍会提示首次设置。
+The app manages `ExecutablePath` automatically and fills it in for older INI files that lack this field. On first launch, recording the path does not create an INI before you save; canceling still brings back the first-run settings on the next launch.
 
-程序无需管理员权限。旧配置中的 `RestrictInput` 字段会被忽略，保存时自动移除，其他设置不受影响。
+Administrator privileges are not required. The legacy `RestrictInput` field is ignored and removed on save; other settings remain compatible.
 
-移除程序：先选择“移除自动启动并退出”，再删除 EXE。若也要清除设置，可手动删除上述 `TakeABreak` 配置目录。
+To remove the app, select **Disable auto-start and exit**, then delete the EXE. To remove your settings too, delete the `TakeABreak` configuration folder above.
 
-## 构建与测试
+## Building and testing
 
-支持 Windows 10 1607+ / Windows 11 x64。需要 Visual Studio 2022 的“使用 C++ 的桌面开发”、Windows SDK 和 CMake 3.20+。
+Built with **C++17 and the native Win32 API**, without Qt, Electron, or .NET.
+
+Supported platforms: Windows 10 1607+ / Windows 11 x64. Building requires Visual Studio 2022 with **Desktop development with C++**, the Windows SDK, and CMake 3.20+.
 
 ```powershell
 cmake -S . -B build -G "Visual Studio 17 2022" -A x64
@@ -58,28 +69,28 @@ cmake --build build --config Release
 ctest --test-dir build -C Release --output-on-failure
 ```
 
-发布程序：`build/Release/TakeABreak.exe`。静态链接 C/C++ 运行库，只需分发此 EXE；测试程序不属于发布依赖。
+The release executable is `build/Release/TakeABreak.exe`. The C/C++ runtime is statically linked, so only this EXE needs to be distributed. The test executable is not a runtime dependency.
 
-自动测试包括调度边界、配置异常值、旧配置兼容、倒计时和暂停策略。界面冒烟测试会短暂显示设置与 2 秒提醒窗口，随后自动退出，**不保存用户设置或改动启动项**。
+Automated tests cover scheduling boundaries, invalid configuration values, legacy configuration compatibility, countdowns, and pause behavior. UI smoke tests briefly show Settings and a two-second break, then exit automatically. **They do not save user settings or modify startup entries.**
 
-CTest 还分别运行中英文界面测试，检查设置和提醒文字、标签宽度，以及语言回退规则；测试仅覆盖进程内语言，不修改 Windows 语言设置。语言不写入 INI，现有配置继续兼容。
+CTest also runs Chinese and English UI tests that check settings and reminder text, label widths, and language fallback. These tests override only the test process's language; they do not change Windows language settings. Language is not stored in the INI, and existing configurations remain compatible.
 
 ```powershell
 .\build\Release\TakeABreak.exe --smoke-test
 ```
 
-开发时可使用 `--preview` 延长预览：先显示设置约 22.5 秒，再显示 20 秒提醒窗口，随后自动退出。同样不会保存设置或改动启动项。
+For a longer development preview, use `--preview`: it shows Settings for about 22.5 seconds, followed by a 20-second break, then exits automatically. It likewise leaves settings and startup entries unchanged.
 
-锁屏/解锁、休眠、多显示器以及 Windows 11 实机行为需要交互验收。自动测试通过不等于这些场景已实测。
+Lock/unlock, sleep, multiple monitors, and behavior on Windows 11 hardware require interactive acceptance testing. Passing automated tests does not mean all of these scenarios have been tested on real systems.
 
-## 资源目标与范围
+## Resource targets and scope
 
-初期目标为 EXE 小于 1 MB、空闲工作集低于 10 MB、空闲 CPU 接近 0%。2026-09-17 在 Windows 10 x64 上测得 Release EXE 为 187.5 KiB，空闲工作集约 11.31 MiB，私有字节约 2.13 MiB，30 秒内新增 CPU 时间为 0 毫秒。**工作集尚未达到 10 MB 目标。** 实际结果受系统、权限和桌面环境影响；完整口径和未测场景见 [VERIFICATION.md](VERIFICATION.md)。
+Initial targets are an EXE smaller than 1 MB, an idle working set below 10 MB, and idle CPU usage near 0%. Early measurements on Windows 10 x64 on 2026-09-17 recorded a 187.5 KiB Release EXE, an idle working set of about 11.31 MiB, about 2.13 MiB of private bytes, and 0 ms of additional CPU time over 30 seconds. **The working set has not met the 10 MB target.** Results depend on the machine, permissions, and desktop environment. See [VERIFICATION.md](VERIFICATION.md) (Chinese) for measurement details and untested scenarios.
 
-空闲时使用消息和定时器等待；提醒窗口仅按需创建。上述资源数据为早期版本测量，不代表当前版本重新测量结果。
+When idle, the app waits on messages and timers; reminder windows are created only when needed. The figures above are from an early version, not fresh measurements of the current release.
 
-提醒支持多显示器、负坐标布局和 DPI 缩放，显示器布局变化时重新覆盖且不重置剩余休息时间。不提供全机策略或守护服务。设计见 [DESIGN.md](DESIGN.md)，开发约束见 [AGENTS.md](AGENTS.md)。
+Reminders support multiple monitors, negative screen coordinates, and DPI scaling. Display layout changes refit the windows without resetting the remaining break time. The app does not provide machine-wide policy enforcement or a background service. See [DESIGN.md](DESIGN.md) for the design and [AGENTS.md](AGENTS.md) for development rules; both are in Chinese.
 
-## 许可证
+## License
 
-[MIT](LICENSE)。Take a Break 是暂定名称，已有同名项目，不宣称名称唯一。
+[MIT](LICENSE). Take a Break is a working name. Other projects already use this name; no claim of uniqueness is made.

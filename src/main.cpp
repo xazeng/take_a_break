@@ -19,6 +19,7 @@ constexpr UINT WM_TRAY = WM_APP + 1;
 constexpr UINT WM_REFIT_BREAK = WM_APP + 2;
 constexpr UINT WM_OPEN_SETTINGS = WM_APP + 3;
 constexpr UINT_PTR kReminderTimer = 1, kDisplayTimer = 2, kSmokeTimer = 3;
+constexpr UINT_PTR kSettingsTimer = 4;
 enum Command : UINT { RestNow = 2001, Pause, Settings, AutoStart, RemoveStartup, Quit };
 
 struct App {
@@ -284,11 +285,28 @@ void ShowMenu() {
     if (command) PostMessageW(app.controller, WM_COMMAND, command, 0);
 }
 
+// 从实际截止时间推导剩余秒数，避免界面刷新延迟造成累计误差。
+void UpdateSettingsStatus(HWND window) {
+    std::wstring status;
+    if (app.session.paused) status = Tr(UiText::Paused);
+    else if (!app.session.available) status = Tr(UiText::Waiting);
+    else if (app.reminder) status = Tr(UiText::Resting);
+    else if (!app.reminderDue) status = Tr(UiText::TimerUnavailable);
+    else {
+        const unsigned seconds = RemainingSeconds(app.reminderDue, GetTickCount64());
+        wchar_t time[32]{};
+        swprintf_s(time, L"%02u:%02u:%02u", seconds / 3600, seconds / 60 % 60, seconds % 60);
+        status = std::wstring(Tr(UiText::NextBreak)) + time;
+    }
+    SetDlgItemTextW(window, IDC_RUNNING_STATUS, status.c_str());
+}
+
 INT_PTR CALLBACK SettingsProc(HWND window, UINT message, WPARAM wParam, LPARAM) {
     switch (message) {
     case WM_INITDIALOG:
         SetWindowTextW(window, Tr(UiText::SettingsTitle));
         SetDlgItemTextW(window, IDC_SETTINGS_INTRO, Tr(UiText::SettingsIntro));
+        SetDlgItemTextW(window, IDC_SETTINGS_NOTICE, Tr(UiText::SettingsNotice));
         SetDlgItemTextW(window, IDC_INTERVAL_LABEL, Tr(UiText::IntervalLabel));
         SetDlgItemTextW(window, IDC_DURATION_LABEL, Tr(UiText::DurationLabel));
         SetDlgItemTextW(window, IDC_HOURLY, Tr(UiText::HourlyLabel));
@@ -305,7 +323,20 @@ INT_PTR CALLBACK SettingsProc(HWND window, UINT message, WPARAM wParam, LPARAM) 
         CheckDlgButton(window, IDC_AUTOSTART, (app.firstRun || AutoStartEnabled()) ? BST_CHECKED : BST_UNCHECKED);
         EnableWindow(GetDlgItem(window, IDC_INTERVAL), !app.config.hourly);
         SetDlgItemTextW(window, IDC_CONFIG_PATH, app.configPath.c_str());
+        UpdateSettingsStatus(window);
         return TRUE;
+    case WM_SHOWWINDOW:
+        if (wParam) {
+            UpdateSettingsStatus(window);
+            if (!SetTimer(window, kSettingsTimer, 1000, nullptr)) {
+                Log(L"创建设置状态刷新定时器失败", GetLastError());
+                SetDlgItemTextW(window, IDC_RUNNING_STATUS, Tr(UiText::StatusRefreshError));
+            }
+        } else KillTimer(window, kSettingsTimer);
+        return FALSE;
+    case WM_TIMER:
+        if (wParam == kSettingsTimer) { UpdateSettingsStatus(window); return TRUE; }
+        break;
     case WM_COMMAND:
         switch (LOWORD(wParam)) {
         case IDC_HOURLY:
@@ -337,7 +368,10 @@ INT_PTR CALLBACK SettingsProc(HWND window, UINT message, WPARAM wParam, LPARAM) 
         }
         break;
     case WM_CLOSE: DestroyWindow(window); return TRUE;
-    case WM_DESTROY: app.settings = nullptr; return TRUE;
+    case WM_DESTROY:
+        KillTimer(window, kSettingsTimer);
+        app.settings = nullptr;
+        return TRUE;
     }
     return FALSE;
 }
@@ -451,7 +485,8 @@ void SmokeTick() {
         GetWindowTextW(app.settings, title, ARRAYSIZE(title));
         if (wcscmp(title, Tr(UiText::SettingsTitle)) != 0) app.exitCode = 29;
         const struct { int control; UiText text; } labels[] = {
-            {IDC_SETTINGS_INTRO, UiText::SettingsIntro}, {IDC_INTERVAL_LABEL, UiText::IntervalLabel},
+            {IDC_SETTINGS_INTRO, UiText::SettingsIntro}, {IDC_SETTINGS_NOTICE, UiText::SettingsNotice},
+            {IDC_INTERVAL_LABEL, UiText::IntervalLabel},
             {IDC_DURATION_LABEL, UiText::DurationLabel}, {IDC_HOURLY, UiText::HourlyLabel},
             {IDC_AUTOSTART, UiText::AutoStartLabel}, {IDOK, UiText::Save}, {IDCANCEL, UiText::Cancel}
         };
@@ -473,6 +508,31 @@ void SmokeTick() {
             SelectObject(dc, oldFont);
             ReleaseDC(control, dc);
         }
+        // 使用测试进程的状态验证实际控件，不修改用户配置或真实会话。
+        const auto savedSession = app.session;
+        const auto savedDue = app.reminderDue;
+        const auto checkStatus = [&](const std::wstring& expected) {
+            SendMessageW(app.settings, WM_TIMER, kSettingsTimer, 0);
+            wchar_t value[256]{};
+            GetDlgItemTextW(app.settings, IDC_RUNNING_STATUS, value, ARRAYSIZE(value));
+            if (expected != value) app.exitCode = 37;
+        };
+        app.session.paused = true;
+        checkStatus(Tr(UiText::Paused));
+        app.session.paused = false;
+        app.session.available = false;
+        checkStatus(Tr(UiText::Waiting));
+        app.session.available = true;
+        app.reminderDue = 0;
+        checkStatus(Tr(UiText::TimerUnavailable));
+        app.reminderDue = GetTickCount64() - 1;
+        checkStatus(std::wstring(Tr(UiText::NextBreak)) + L"00:00:00");
+        app.reminderDue = GetTickCount64() + 86399500ULL;
+        checkStatus(std::wstring(Tr(UiText::NextBreak)) + L"24:00:00");
+        app.reminderDue -= 1000;
+        checkStatus(std::wstring(Tr(UiText::NextBreak)) + L"23:59:59");
+        app.session = savedSession;
+        app.reminderDue = savedDue;
         DestroyWindow(app.settings);
         if (!StartSmokeNotifier()) app.exitCode = 33;
         app.smokePhase = 1;
